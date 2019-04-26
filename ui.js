@@ -2,7 +2,7 @@
 
 // Main game
 class Game extends React.Component {
-	
+
 	state = {
 		height: 10,
 		width: 10,
@@ -20,8 +20,8 @@ class Game extends React.Component {
 
 // Cell
 class Cell extends React.Component {
-	render(){
 
+	render(){
 		var iconClass = "";
 		var style = {};
 		var bgStyle = {};
@@ -42,10 +42,13 @@ class Cell extends React.Component {
 				style["color"] = "red";
 				bgStyle["background-color"] = "lightgrey";
 				break;
+			case cellState.VALID:
+				bgStyle["background-color"] = "green";
+				break;
 		}
 
 		return(
-			<div className="square" style={bgStyle}>
+			<div className="square" style={bgStyle} onClick={this.props.onClick}>
 				<i className={iconClass} style={style}></i>
 			</div>
 		);
@@ -58,22 +61,52 @@ class Board extends React.Component {
 	constructor(props){
 		super(props);
 		this.amazons = new Amazons();
+
+		this.setState({
+			gameState: this.amazons.state,
+		});
+	}
+
+	renderCell(row, col){
+		return (<Cell value={this.amazons.board[row][col]} onClick={ () => {this.handleClick(row, col)} } />);
 	}
 
 	render(){
-
 		var cells = [];
-		this.amazons.board.forEach(row => {
-			row.forEach(e => {
-				cells.push(<Cell value={e} />);
-			})
-		});
+		for(var i = 0; i < this.amazons.board.length; i++){
+            for(var j = 0; j < this.amazons.board[0].length; j++){
+				cells.push(this.renderCell(i, j));
+            }
+		}
 
 		return(
 			<div className="grid-container">
 				{cells}
 			</div>
 		);
+	}
+
+	handleClick(row, col){
+		switch(this.amazons.state){
+			case gameState.BLACK_IDLE:
+				this.amazons.choosePiece(row, col);
+				break;
+			case gameState.WHITE_IDLE:
+				this.amazons.choosePiece(row, col);
+				break;
+			case gameState.BLACK_MOVING:
+				this.amazons.chooseMove(row, col);
+				break;
+			case gameState.WHITE_MOVING:
+				this.amazons.chooseMove(row, col);
+				break;
+		}
+
+		console.log(this.amazons.state);
+
+		this.setState({
+			gameState: this.amazons.state,
+		});
 	}
 }
 
