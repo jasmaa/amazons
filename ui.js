@@ -100,9 +100,13 @@ class Board extends React.Component {
 			case gameState.WHITE_MOVING:
 				this.amazons.chooseMove(row, col);
 				break;
+			case gameState.BLACK_FIRING:
+				this.amazons.chooseFire(row, col);
+				break;
+			case gameState.WHITE_FIRING:
+				this.amazons.chooseFire(row, col);
+				break;
 		}
-
-		console.log(this.amazons.state);
 
 		this.setState({
 			gameState: this.amazons.state,

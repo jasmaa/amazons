@@ -30,7 +30,7 @@ class Amazons{
         this.board[6][0] = cellState.WHITE;
         this.board[6][9] = cellState.WHITE;
         this.board[9][3] = cellState.WHITE;
-        this.board[9][6] = cellState.FIRE;
+        this.board[9][6] = cellState.WHITE;
 
         this.currRow = -1;
         this.currCol = -1;
@@ -127,12 +127,12 @@ class Amazons{
                 this.board[row][col] = cellState.BLACK;
                 this.clearValid();
 
-                this.board.state = gameState.WHITE_IDLE;
-
+                this.eightRaycast(row, col);
+                this.state = gameState.BLACK_FIRING;
             }
             else{
                 this.clearValid();
-                this.board.state = gameState.BLACK_IDLE;
+                this.state = gameState.BLACK_IDLE;
             }
         }
         if(this.state == gameState.WHITE_MOVING){
@@ -141,12 +141,38 @@ class Amazons{
                 this.board[row][col] = cellState.WHITE;
                 this.clearValid();
 
-                this.board.state = gameState.BLACK_IDLE;
-
+                this.eightRaycast(row, col);
+                this.state = gameState.WHITE_FIRING;
             }
             else{
                 this.clearValid();
-                this.board.state = gameState.WHITE_IDLE;
+                this.state = gameState.WHITE_IDLE;
+            }
+        }
+    }
+
+    /**
+     * Selects location to fire
+     * @param {*} row 
+     * @param {*} col 
+     */
+    chooseFire(row, col){
+        // Black
+        if(this.state == gameState.BLACK_FIRING){
+            if(this.board[row][col] == cellState.VALID){
+                this.board[row][col] = cellState.FIRE;
+                this.clearValid();
+
+                this.state = gameState.WHITE_IDLE;
+            }
+        }
+        // White
+        if(this.state == gameState.WHITE_FIRING){
+            if(this.board[row][col] == cellState.VALID){
+                this.board[row][col] = cellState.FIRE;
+                this.clearValid();
+
+                this.state = gameState.BLACK_IDLE;
             }
         }
     }
