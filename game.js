@@ -34,6 +34,8 @@ class Amazons{
 
         this.currRow = -1;
         this.currCol = -1;
+        this.prevRow = -1;
+        this.prevCol = -1;
 
         this.state = gameState.BLACK_IDLE;
     }
@@ -46,18 +48,22 @@ class Amazons{
      * @param {*} dirCol 
      */
     raycast(row, col, dirRow, dirCol){
+        var count = 0;
         row += dirRow;
         col += dirCol;
 
         while(row >= 0 && row < this.board.length && col >= 0 && col < this.board[0].length){
             
             if(this.board[row][col] != cellState.EMPTY){
-                return;
+                break;
             }
             this.board[row][col] = cellState.VALID;
+            count++;
             row += dirRow;
             col += dirCol;
         }
+
+        return count;
     }
 
     /**
@@ -66,14 +72,18 @@ class Amazons{
      * @param {*} col 
      */
     eightRaycast(row, col){
-        this.raycast(row, col, 0, 1);
-        this.raycast(row, col, 0, -1);
-        this.raycast(row, col, 1, 0);
-        this.raycast(row, col, -1, 0);
-        this.raycast(row, col, -1, -1);
-        this.raycast(row, col, -1, 1);
-        this.raycast(row, col, 1, -1);
-        this.raycast(row, col, 1, 1);
+        var count = 0;
+
+        count += this.raycast(row, col, 0, 1);
+        count += this.raycast(row, col, 0, -1);
+        count += this.raycast(row, col, 1, 0);
+        count += this.raycast(row, col, -1, 0);
+        count += this.raycast(row, col, -1, -1);
+        count += this.raycast(row, col, -1, 1);
+        count += this.raycast(row, col, 1, -1);
+        count += this.raycast(row, col, 1, 1);
+
+        return count;
     }
 
     /**
@@ -96,21 +106,24 @@ class Amazons{
      */
     choosePiece(row, col){
         // Black
+        var playingMoving, playingColor;
         if(this.state == gameState.BLACK_IDLE){
-            if(this.board[row][col] == cellState.BLACK){
-                this.currRow = row;
-                this.currCol = col;
-                this.eightRaycast(row, col);
-                this.state = gameState.BLACK_MOVING;
-            }
+            playingMoving = gameState.BLACK_MOVING;
+            playingColor = cellState.BLACK;
         }
-        // White
-        if(this.state == gameState.WHITE_IDLE){
-            if(this.board[row][col] == cellState.WHITE){
-                this.currRow = row;
-                this.currCol = col;
-                this.eightRaycast(row, col);
-                this.state = gameState.WHITE_MOVING;
+        else if(this.state == gameState.WHITE_IDLE){
+            playingMoving = gameState.WHITE_MOVING;
+            playingColor = cellState.WHITE;
+        }
+        else{
+            return;
+        }
+
+        if(this.board[row][col] == playingColor){
+            if(this.eightRaycast(row, col) > 0){
+                this.prevRow = row;
+                this.prevCol = col;
+                this.state = playingMoving;
             }
         }
     }
@@ -121,34 +134,36 @@ class Amazons{
      * @param {*} col 
      */
     chooseMove(row, col){
+        var playingFiring, playingColor, playingIdle;
         if(this.state == gameState.BLACK_MOVING){
-            if(this.board[row][col] == cellState.VALID){
-                this.board[this.currRow][this.currCol] = cellState.EMPTY;
-                this.board[row][col] = cellState.BLACK;
-                this.clearValid();
-
-                this.eightRaycast(row, col);
-                this.state = gameState.BLACK_FIRING;
-            }
-            else{
-                this.clearValid();
-                this.state = gameState.BLACK_IDLE;
-            }
+            playingIdle = gameState.BLACK_IDLE;
+            playingColor = cellState.BLACK;
+            playingFiring = gameState.BLACK_FIRING;
         }
-        if(this.state == gameState.WHITE_MOVING){
-            if(this.board[row][col] == cellState.VALID){
-                this.board[this.currRow][this.currCol] = cellState.EMPTY;
-                this.board[row][col] = cellState.WHITE;
-                this.clearValid();
-
-                this.eightRaycast(row, col);
-                this.state = gameState.WHITE_FIRING;
-            }
-            else{
-                this.clearValid();
-                this.state = gameState.WHITE_IDLE;
-            }
+        else if(this.state == gameState.WHITE_MOVING){
+            playingIdle = gameState.WHITE_IDLE;
+            playingColor = cellState.WHITE;
+            playingFiring = gameState.WHITE_FIRING;
         }
+        else{
+            return;
+        }
+
+        if(this.board[row][col] == cellState.VALID){
+            this.board[this.prevRow][this.prevCol] = cellState.EMPTY;
+            this.board[row][col] = playingColor;
+            this.currRow = row;
+            this.currCol = col;
+            this.clearValid();
+
+            this.eightRaycast(row, col);
+            this.state = playingFiring;
+        }
+        else{
+            this.clearValid();
+            this.state = playingIdle;
+        }
+        
     }
 
     /**
@@ -157,23 +172,32 @@ class Amazons{
      * @param {*} col 
      */
     chooseFire(row, col){
-        // Black
+        var opponentIdle, playingColor, playingIdle;
         if(this.state == gameState.BLACK_FIRING){
-            if(this.board[row][col] == cellState.VALID){
-                this.board[row][col] = cellState.FIRE;
-                this.clearValid();
-
-                this.state = gameState.WHITE_IDLE;
-            }
+            opponentIdle = gameState.WHITE_IDLE;
+            playingIdle = gameState.BLACK_IDLE;
+            playingColor = cellState.BLACK;
         }
-        // White
-        if(this.state == gameState.WHITE_FIRING){
-            if(this.board[row][col] == cellState.VALID){
-                this.board[row][col] = cellState.FIRE;
-                this.clearValid();
+        else if(this.state == gameState.WHITE_FIRING){
+            opponentIdle = gameState.BLACK_IDLE;
+            playingIdle = gameState.WHITE_IDLE;
+            playingColor = cellState.WHITE;
+        }
+        else{
+            return;
+        }
 
-                this.state = gameState.BLACK_IDLE;
-            }
+        if(this.board[row][col] == cellState.VALID){
+            this.board[row][col] = cellState.FIRE;
+            this.clearValid();
+
+            this.state = opponentIdle;
+        }
+        else{
+            this.clearValid();
+            this.board[this.currRow][this.currCol] = cellState.EMPTY;
+            this.board[this.prevRow][this.prevCol] = playingColor;
+            this.state = playingIdle;
         }
     }
 }
