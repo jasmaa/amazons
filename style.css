@@ -2,8 +2,8 @@
     display: grid;
     justify-content: center;
     align-content: center;
-    grid-template-columns: repeat(10, 4vw);
-    grid-template-rows: repeat(10, 4vw);
+    grid-template-columns: repeat(10, 3vw);
+    grid-template-rows: repeat(10, 3vw);
 }
 
 .square {

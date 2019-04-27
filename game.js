@@ -1,4 +1,4 @@
-// game logic
+// Game logic
 
 const cellState = {
     FIRE: -1,
@@ -15,12 +15,23 @@ const gameState = {
     WHITE_IDLE: 3,
     WHITE_MOVING: 4,
     WHITE_FIRING: 5,
+    BLACK_WIN: 6,
+    WHITE_WIN: 7,
 }
 
-// Amazons game
+/**
+ * Amazons game model
+ */
 class Amazons{
 
     constructor(){
+        this.reset();
+    }
+
+    /**
+     * Resets the board
+     */
+    reset(){
         // init board
         this.board = [...Array(10)].map(e => Array(10).fill(cellState.EMPTY));
         this.board[0][3] = cellState.BLACK;
@@ -37,6 +48,8 @@ class Amazons{
         this.prevRow = -1;
         this.prevCol = -1;
 
+        this.moves = [];
+
         this.state = gameState.BLACK_IDLE;
     }
 
@@ -47,7 +60,7 @@ class Amazons{
      * @param {*} dirRow 
      * @param {*} dirCol 
      */
-    raycast(row, col, dirRow, dirCol){
+    raycast(row, col, dirRow, dirCol, markValid){
         var count = 0;
         row += dirRow;
         col += dirCol;
@@ -57,7 +70,11 @@ class Amazons{
             if(this.board[row][col] != cellState.EMPTY){
                 break;
             }
-            this.board[row][col] = cellState.VALID;
+            
+            if(markValid){
+                this.board[row][col] = cellState.VALID;
+            }
+            
             count++;
             row += dirRow;
             col += dirCol;
@@ -71,17 +88,17 @@ class Amazons{
      * @param {*} row 
      * @param {*} col 
      */
-    eightRaycast(row, col){
+    eightRaycast(row, col, markValid){
         var count = 0;
 
-        count += this.raycast(row, col, 0, 1);
-        count += this.raycast(row, col, 0, -1);
-        count += this.raycast(row, col, 1, 0);
-        count += this.raycast(row, col, -1, 0);
-        count += this.raycast(row, col, -1, -1);
-        count += this.raycast(row, col, -1, 1);
-        count += this.raycast(row, col, 1, -1);
-        count += this.raycast(row, col, 1, 1);
+        count += this.raycast(row, col, 0, 1, markValid);
+        count += this.raycast(row, col, 0, -1, markValid);
+        count += this.raycast(row, col, 1, 0, markValid);
+        count += this.raycast(row, col, -1, 0, markValid);
+        count += this.raycast(row, col, -1, -1, markValid);
+        count += this.raycast(row, col, -1, 1, markValid);
+        count += this.raycast(row, col, 1, -1, markValid);
+        count += this.raycast(row, col, 1, 1, markValid);
 
         return count;
     }
@@ -120,7 +137,7 @@ class Amazons{
         }
 
         if(this.board[row][col] == playingColor){
-            if(this.eightRaycast(row, col) > 0){
+            if(this.eightRaycast(row, col, true) > 0){
                 this.prevRow = row;
                 this.prevCol = col;
                 this.state = playingMoving;
@@ -156,7 +173,7 @@ class Amazons{
             this.currCol = col;
             this.clearValid();
 
-            this.eightRaycast(row, col);
+            this.eightRaycast(row, col, true);
             this.state = playingFiring;
         }
         else{
@@ -191,6 +208,13 @@ class Amazons{
             this.board[row][col] = cellState.FIRE;
             this.clearValid();
 
+            // update move table
+            this.moves.push(
+                this.positionToNotation(this.prevRow, this.prevCol) +
+                this.positionToNotation(this.currRow, this.currCol) +
+                "("+this.positionToNotation(row, col)+")"
+            );
+
             this.state = opponentIdle;
         }
         else{
@@ -199,5 +223,63 @@ class Amazons{
             this.board[this.prevRow][this.prevCol] = playingColor;
             this.state = playingIdle;
         }
+    }
+
+    /**
+     * Detects end of game
+     * @param {Losing player} playerColor 
+     */
+    detectEnd(playerColor){
+        var count = 0;
+        for(var i = 0; i < this.board.length; i++){
+            for(var j = 0; j < this.board[0].length; j++){
+                if(this.board[i][j] == playerColor){
+                    count += this.eightRaycast(i, j, false);
+                }
+            }
+        }
+
+        // Set win state
+        if(count == 0){
+            switch(playerColor){
+                case cellState.BLACK:
+                    this.state = gameState.WHITE_WIN;
+                    break;
+                case cellState.WHITE:
+                    this.state = gameState.BLACK_WIN;
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Gets name of current state
+     */
+    getStateName(){
+        switch(this.state){
+            case gameState.BLACK_IDLE:
+                return "Black's turn";
+            case gameState.BLACK_MOVING:
+                return "Choosing black move";
+            case gameState.BLACK_FIRING:
+                return "Choosing black fire";
+            case gameState.WHITE_IDLE:
+                return "White's turn";
+            case gameState.WHITE_MOVING:
+                return "Choosing white move";
+            case gameState.WHITE_FIRING:
+                return "Choosing white fire";
+            case gameState.BLACK_WIN:
+                return "Black wins";
+            case gameState.WHITE_WIN:
+                return "White wins";
+        }
+    }
+
+    /**
+     * Converts row, col to notation
+     */
+    positionToNotation(row, col){
+        return String.fromCharCode(col + 97) + (this.board.length - row); 
     }
 }
