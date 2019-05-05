@@ -8,6 +8,7 @@ class Game extends React.Component {
 	constructor(props){
 		super(props);
 		this.amazons = new Amazons();
+		this.playerWhite = new AIPlayer(cellState.WHITE, this.amazons);
 
 		this.setState({
 			gameState: this.amazons.state,
@@ -63,9 +64,16 @@ class Game extends React.Component {
 				this.amazons.chooseMove(row, col);
 				break;
 			case gameState.BLACK_FIRING:
-				this.amazons.chooseFire(row, col);
-				this.amazons.detectEnd(cellState.BLACK);
-				this.amazons.detectEnd(cellState.WHITE);
+				if(this.amazons.chooseFire(row, col)){
+					this.amazons.detectEnd(cellState.BLACK);
+					this.amazons.detectEnd(cellState.WHITE);
+
+					// AI turn
+					this.playerWhite.nextMove();
+					this.amazons.detectEnd(cellState.BLACK);
+					this.amazons.detectEnd(cellState.WHITE);
+				}
+
 				break;
 			case gameState.WHITE_FIRING:
 				this.amazons.chooseFire(row, col);
