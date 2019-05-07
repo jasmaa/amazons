@@ -1,0 +1,32 @@
+{
+  "name": "amazons",
+  "version": "1.0.0",
+  "description": "JS implementation of the Game of the Amazons",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasmaa/amazons.git"
+  },
+  "keywords": [],
+  "author": "Jason Maa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasmaa/amazons/issues"
+  },
+  "homepage": "https://github.com/jasmaa/amazons#readme",
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.2"
+  },
+  "dependencies": {}
+}

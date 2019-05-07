@@ -1,4 +1,9 @@
 // React UI
+import React from 'react';
+import {Amazons} from './game';
+import {cellState} from './game';
+import {gameState} from './game';
+import {AIPlayer} from './ai';
 
 const playerState = {
 	HUMAN: 0,
@@ -8,13 +13,13 @@ const playerState = {
 /**
  * Main game
  */
-class Game extends React.Component {
+export default class Game extends React.Component {
 	
 	constructor(props){
 		super(props);
 		this.amazons = new Amazons();
 		this.playerStateBlack = playerState.HUMAN;
-		this.playerStateWhite = playerState.HUMAN;
+		this.playerStateWhite = playerState.AI;
 		this.aiWhite = new AIPlayer(cellState.WHITE, this.amazons);
 		this.aiBlack = new AIPlayer(cellState.BLACK, this.amazons);
 
@@ -28,6 +33,8 @@ class Game extends React.Component {
 		this.setState({
 			gameState: this.amazons.state,
 		});
+
+		console.log(cellState);
 	}
 
     render() {
@@ -197,9 +204,3 @@ class MoveLog extends React.Component {
 		);
 	}
 }
-
-// Render game
-ReactDOM.render(
-    <Game />,
-    document.getElementById('root')
-);

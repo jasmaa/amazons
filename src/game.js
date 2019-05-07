@@ -1,6 +1,6 @@
 // Game logic
 
-const cellState = {
+export const cellState = {
     FIRE: -1,
     EMPTY: 0,
     BLACK: 1,
@@ -8,7 +8,7 @@ const cellState = {
     VALID: 3,
 }
 
-const gameState = {
+export const gameState = {
     BLACK_IDLE: 0,
     BLACK_MOVING: 1,
     BLACK_FIRING: 2,
@@ -22,7 +22,7 @@ const gameState = {
 /**
  * Amazons game model
  */
-class Amazons {
+export class Amazons {
 
     constructor() {
         this.reset();
@@ -323,7 +323,7 @@ function raycast(board, row, col, dirRow, dirCol) {
  * @param {*} row 
  * @param {*} col 
  */
-function eightRaycast(board, row, col) {
+export function eightRaycast(board, row, col) {
     var hitList = [];
 
     for (var i = -1; i <= 1; i++) {

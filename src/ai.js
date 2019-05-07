@@ -1,9 +1,11 @@
 // Computer player
+import {eightRaycast} from './game';
+import {cellState} from './game';
 
 /**
  * Agent that selects random valid moves
  */
-class RandomPlayer {
+export class RandomPlayer {
 
     constructor(color, amazons) {
         this.color = color;
@@ -40,7 +42,7 @@ class RandomPlayer {
  * Plays randomly and switches to relative territory of
  * depth 1 when search tree is small enough
  */
-class AIPlayer {
+export class AIPlayer {
 
     constructor(color, amazons) {
         this.color = color;
