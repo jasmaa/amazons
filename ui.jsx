@@ -1,5 +1,10 @@
 // React UI
 
+const playerState = {
+	HUMAN: 0,
+	AI: 1,
+}
+
 /**
  * Main game
  */
@@ -8,7 +13,17 @@ class Game extends React.Component {
 	constructor(props){
 		super(props);
 		this.amazons = new Amazons();
-		this.playerWhite = new AIPlayer(cellState.WHITE, this.amazons);
+		this.playerStateBlack = playerState.HUMAN;
+		this.playerStateWhite = playerState.HUMAN;
+		this.aiWhite = new AIPlayer(cellState.WHITE, this.amazons);
+		this.aiBlack = new AIPlayer(cellState.BLACK, this.amazons);
+
+		// init game
+		if(this.playerStateBlack == playerState.AI){
+			this.aiBlack.nextMove();
+			this.amazons.detectEnd(cellState.BLACK);
+			this.amazons.detectEnd(cellState.WHITE);
+		}
 
 		this.setState({
 			gameState: this.amazons.state,
@@ -68,17 +83,26 @@ class Game extends React.Component {
 					this.amazons.detectEnd(cellState.BLACK);
 					this.amazons.detectEnd(cellState.WHITE);
 
-					// AI turn
-					this.playerWhite.nextMove();
-					this.amazons.detectEnd(cellState.BLACK);
-					this.amazons.detectEnd(cellState.WHITE);
+					// AI move
+					if(this.playerStateWhite == playerState.AI && this.amazons.state == gameState.WHITE_IDLE){
+						this.aiWhite.nextMove();
+						this.amazons.detectEnd(cellState.BLACK);
+						this.amazons.detectEnd(cellState.WHITE);
+					}
 				}
-
 				break;
 			case gameState.WHITE_FIRING:
-				this.amazons.chooseFire(row, col);
-				this.amazons.detectEnd(cellState.BLACK);
-				this.amazons.detectEnd(cellState.WHITE);
+				if(this.amazons.chooseFire(row, col)){
+					this.amazons.detectEnd(cellState.BLACK);
+					this.amazons.detectEnd(cellState.WHITE);
+
+					// AI move
+					if(this.playerStateBlack == playerState.AI && this.amazons.state == gameState.BLACK_IDLE){
+						this.aiBlack.nextMove();
+						this.amazons.detectEnd(cellState.BLACK);
+						this.amazons.detectEnd(cellState.WHITE);
+					}
+				}
 				break;
 		}
 
