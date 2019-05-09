@@ -33,8 +33,6 @@ export default class Game extends React.Component {
 		this.setState({
 			gameState: this.amazons.state,
 		});
-
-		console.log(cellState);
 	}
 
     render() {
@@ -48,14 +46,28 @@ export default class Game extends React.Component {
 						<div className="jumbotron">
 							<MoveLog moves={this.amazons.moves} />
 							<br />
-							<button className="btn btn-primary" onClick={
-								() => {
-									this.amazons.reset();
-									this.setState({
-										gameState: this.amazons.state,
-									});
-								}
-							}>RESET</button>
+							<div class="row">
+								<button className="col-4 btn btn-danger" onClick={
+									() => {
+										this.amazons.reset();
+										this.setState({
+											gameState: this.amazons.state,
+										});
+									}
+								}>RESET</button>
+								<PlayerToggler
+									className="col-1"
+									playerColor={cellState.BLACK}
+									playerType={this.playerStateBlack}
+									changePlayer= {(pColor, pType) => this.changePlayer(pColor, pType)}
+								/>
+								<PlayerToggler
+									className="col-1"
+									playerColor={cellState.WHITE}
+									playerType={this.playerStateWhite}
+									changePlayer= {(pColor, pType) => this.changePlayer(pColor, pType)}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -71,6 +83,9 @@ export default class Game extends React.Component {
 		);
 	}
 	
+	/**
+	 * Handles click on the board
+	 */
 	handleClick(row, col){
 		switch(this.amazons.state){
 			case gameState.BLACK_IDLE:
@@ -116,6 +131,97 @@ export default class Game extends React.Component {
 		this.setState({
 			gameState: this.amazons.state,
 		});
+	}
+
+	/**
+	 * Handles player change
+	 * @param {*} playerColor 
+	 * @param {*} playerType 
+	 */
+	changePlayer(playerColor, playerType){
+
+		if(playerColor == cellState.BLACK){
+			// disallow ai vs ai
+			if(this.playerStateWhite == playerState.AI && playerType == playerState.AI){
+				alert("AI cannot fight AI");
+				return false;
+			}
+
+			this.playerStateBlack = playerType;
+			return true;
+		}
+		else if(playerColor == cellState.WHITE){
+			// disallow ai vs ai
+			if(this.playerStateBlack == playerState.AI && playerType == playerState.AI){
+				alert("AI cannot fight AI");
+				return false;
+			}
+
+			this.playerStateWhite = playerType;
+			return true;
+		}
+
+		return false;
+	}
+}
+
+/**
+ * Toggles human/ai player
+ */
+class PlayerToggler extends React.Component {
+
+	constructor(props){
+		super(props);
+
+		var name;
+		this.className;
+		
+		if(this.props.playerColor == cellState.BLACK){
+			this.className = "btn btn-dark dropdown-toggle";
+		}
+		else if(this.props.playerColor == cellState.WHITE){
+			this.className = "btn btn-light dropdown-toggle";
+		}
+
+		if(this.props.playerType == playerState.HUMAN){
+			name = "Human";
+		}
+		else if(this.props.playerType == playerState.AI){
+			name = "AI";
+		}
+
+		this.state = {
+			text: name,
+		};
+	}
+
+	changeName(name){
+		this.setState({
+			text: name,
+		});
+	}
+
+	render(){
+
+		return (
+			<div class="dropdown">
+				<button type="button" class={this.className} data-toggle="dropdown">
+					{this.state.text}
+				</button>
+				<div class="dropdown-menu">
+					<a class="dropdown-item" onClick={() => {
+						if(this.props.changePlayer(this.props.playerColor, playerState.HUMAN)){
+							this.changeName("Human");
+						}
+					}} >Human</a>
+					<a class="dropdown-item" onClick={() => {
+						if(this.props.changePlayer(this.props.playerColor, playerState.AI)){
+							this.changeName("AI");
+						}
+					}} >AI</a>
+				</div>
+			</div> 
+		);
 	}
 }
 
